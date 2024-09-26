@@ -1,0 +1,2065 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Gestion des Utilisateurs",
+    "version": "1.0.0",
+    "description": "API pour la gestion des utilisateurs, y compris l'authentification et la manipulation des données utilisateur."
+  },
+  "components": {
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ],
+  "paths": {
+    "/api/v1/login": {
+      "post": {
+        "summary": "Connexion d'un utilisateur",
+        "description": "Permet aux utilisateurs de se connecter en utilisant leurs identifiants.",
+        "operationId": "loginUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "admin@gmail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connexion réussie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "Jeton d'accès JWT pour l'authentification",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "refresh_token": {
+                      "type": "string",
+                      "description": "Jeton de rafraîchissement",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "user": {
+                      "type": "object",
+                      "description": "Détails de l'utilisateur connecté",
+                      "properties": {
+                        "uid": {
+                          "type": "string",
+                          "example": "abc123"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "user@example.com"
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "example": "John Doe"
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "admin"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Échec de l'authentification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Identifiants incorrects."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "summary": "Récupérer tous les utilisateurs",
+        "description": "Retourne une liste de tous les utilisateurs, avec la possibilité de filtrer par rôle.",
+        "operationId": "getUsers",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "description": "Filtrer les utilisateurs par rôle",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "admin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utilisateurs récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Utilisateurs récupérés avec succès"
+                    },
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "uid": {
+                            "type": "string",
+                            "example": "abc123"
+                          },
+                          "email": {
+                            "type": "string",
+                            "example": "user@example.com"
+                          },
+                          "role": {
+                            "type": "string",
+                            "example": "admin"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur lors de la récupération des utilisateurs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la récupération des utilisateurs"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer un nouvel utilisateur",
+        "description": "Crée un nouvel utilisateur dans le système.",
+        "operationId": "createUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nom": {
+                    "type": "string",
+                    "example": "Doe"
+                  },
+                  "prenom": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                  },
+                  "login": {
+                    "type": "string",
+                    "example": "johndoe"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "fonction": {
+                    "type": "string",
+                    "example": "Manager"
+                  },
+                  "statut": {
+                    "type": "string",
+                    "example": "Actif"
+                  },
+                  "role_id": {
+                    "type": "integer",
+                    "example": 2
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Utilisateur créé avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Utilisateur créé avec succès"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "uid": {
+                          "type": "string",
+                          "example": "abc123"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "john.doe@example.com"
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "admin"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur lors de la création de l'utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la création de l'utilisateur"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "patch": {
+        "summary": "Mettre à jour un utilisateur",
+        "description": "Mise à jour des informations d'un utilisateur existant.",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de l'utilisateur",
+            "schema": {
+              "type": "string",
+              "example": "abc123"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nom": {
+                    "type": "string",
+                    "example": "Doe"
+                  },
+                  "prenom": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Utilisateur mis à jour avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Utilisateur mis à jour avec succès"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "uid": {
+                          "type": "string",
+                          "example": "abc123"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "john.doe@example.com"
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "admin"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur lors de la mise à jour de l'utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la mise à jour de l'utilisateur"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/export": {
+      "get": {
+        "summary": "Exporter les utilisateurs en fichier Excel",
+        "description": "Génère et télécharge un fichier Excel contenant les informations des utilisateurs.",
+        "operationId": "exportExcel",
+        "responses": {
+          "200": {
+            "description": "Fichier Excel généré et téléchargé avec succès",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur lors de l'exportation des utilisateurs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de l'exportation des utilisateurs"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/referentiels": {
+      "post": {
+        "summary": "Créer un nouveau référentiel",
+        "description": "Crée un nouveau référentiel avec ses compétences et modules associés.",
+        "operationId": "createReferentiel",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "Code unique du référentiel",
+                    "example": "REF123"
+                  },
+                  "libelle": {
+                    "type": "string",
+                    "description": "Libellé du référentiel",
+                    "example": "Développement Web"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description du référentiel",
+                    "example": "Référentiel pour le développement web et mobile"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "description": "URL de la photo du référentiel",
+                    "example": "https://example.com/photo.jpg"
+                  },
+                  "competences": {
+                    "type": "array",
+                    "description": "Liste des compétences associées au référentiel",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "nom": {
+                          "type": "string",
+                          "description": "Nom de la compétence",
+                          "example": "Programmation en PHP"
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "Description de la compétence",
+                          "example": "Capacité à développer des applications PHP"
+                        },
+                        "duree_acquisition": {
+                          "type": "integer",
+                          "description": "Durée d'acquisition de la compétence en mois",
+                          "example": 6
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "Type de compétence (théorique ou pratique)",
+                          "example": "pratique"
+                        },
+                        "modules": {
+                          "type": "array",
+                          "description": "Liste des modules associés à la compétence",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "nom": {
+                                "type": "string",
+                                "description": "Nom du module",
+                                "example": "Introduction à PHP"
+                              },
+                              "description": {
+                                "type": "string",
+                                "description": "Description du module",
+                                "example": "Apprendre les bases de PHP"
+                              },
+                              "duree_acquisition": {
+                                "type": "integer",
+                                "description": "Durée d'acquisition du module en heures",
+                                "example": 40
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "code",
+                  "libelle",
+                  "competences"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Référentiel créé avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Référentiel créé avec succès"
+                    },
+                    "referentiel": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "1"
+                        },
+                        "code": {
+                          "type": "string",
+                          "example": "REF123"
+                        },
+                        "libelle": {
+                          "type": "string",
+                          "example": "Développement Web"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "Référentiel pour le développement web"
+                        },
+                        "photo": {
+                          "type": "string",
+                          "example": "https://example.com/photo.jpg"
+                        },
+                        "competences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "nom": {
+                                "type": "string",
+                                "example": "Programmation en PHP"
+                              },
+                              "description": {
+                                "type": "string",
+                                "example": "Capacité à développer en PHP"
+                              },
+                              "duree_acquisition": {
+                                "type": "integer",
+                                "example": 6
+                              },
+                              "type": {
+                                "type": "string",
+                                "example": "pratique"
+                              },
+                              "modules": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "nom": {
+                                      "type": "string",
+                                      "example": "Introduction à PHP"
+                                    },
+                                    "description": {
+                                      "type": "string",
+                                      "example": "Apprendre les bases de PHP"
+                                    },
+                                    "duree_acquisition": {
+                                      "type": "integer",
+                                      "example": 40
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur lors de la création du référentiel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la création du référentiel"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/referentiel": {
+      "get": {
+        "summary": "Liste des référentiels",
+        "description": "Récupère une liste de référentiels actifs, inactifs ou archivés en fonction du paramètre 'statut'.",
+        "operationId": "getReferentiels",
+        "parameters": [
+          {
+            "name": "statut",
+            "in": "query",
+            "description": "Le statut des référentiels à récupérer (ACTIF, INACTIF, ARCHIVER)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIF",
+                "INACTIF",
+                "ARCHIVER"
+              ],
+              "default": "ACTIF"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des référentiels récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "code": {
+                        "type": "string",
+                        "example": "REF123"
+                      },
+                      "libelle": {
+                        "type": "string",
+                        "example": "Développement Web"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Référentiel pour le développement web"
+                      },
+                      "photo": {
+                        "type": "string",
+                        "example": "https://example.com/photo.jpg"
+                      },
+                      "statut": {
+                        "type": "string",
+                        "example": "ACTIF"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur lors de la récupération des référentiels",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la récupération des référentiels"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/referentiels/{id}": {
+      "get": {
+        "summary": "Obtenir un référentiel spécifique avec possibilité de filtrer par compétences ou modules",
+        "description": "Récupère les détails d'un référentiel spécifique à partir de son ID Firebase avec la possibilité de filtrer par compétences ou modules.",
+        "operationId": "getReferentielByIdWithFilter",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "L'ID du référentiel à récupérer",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "description": "Filtrer les résultats par 'competences' ou 'modules'",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "competences",
+                "modules"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Référentiel récupéré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "firebase123"
+                    },
+                    "code": {
+                      "type": "string",
+                      "example": "REF123"
+                    },
+                    "libelle": {
+                      "type": "string",
+                      "example": "Développement Web"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Référentiel pour le développement web"
+                    },
+                    "photo": {
+                      "type": "string",
+                      "example": "https://example.com/photo.jpg"
+                    },
+                    "statut": {
+                      "type": "string",
+                      "example": "ACTIF"
+                    },
+                    "competences": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "nom": {
+                            "type": "string",
+                            "example": "Programmation en PHP"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Capacité à développer en PHP"
+                          },
+                          "duree_acquisition": {
+                            "type": "integer",
+                            "example": 6
+                          },
+                          "type": {
+                            "type": "string",
+                            "example": "pratique"
+                          },
+                          "modules": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "nom": {
+                                  "type": "string",
+                                  "example": "Introduction à PHP"
+                                },
+                                "description": {
+                                  "type": "string",
+                                  "example": "Apprendre les bases de PHP"
+                                },
+                                "duree_acquisition": {
+                                  "type": "integer",
+                                  "example": 40
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Référentiel non trouvé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Référentiel non trouvé"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur lors de la récupération du référentiel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la récupération du référentiel"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Modifier un référentiel",
+        "description": "Permet de modifier les informations générales d'un référentiel, ajouter ou supprimer des compétences et des modules.",
+        "operationId": "patchReferentiel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "L'ID du référentiel à modifier",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Les modifications à apporter au référentiel.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "generalInfo": {
+                    "type": "object",
+                    "description": "Informations générales à mettre à jour.",
+                    "properties": {
+                      "libelle": {
+                        "type": "string",
+                        "example": "Nouveau libellé"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Nouvelle description du référentiel."
+                      },
+                      "photo": {
+                        "type": "string",
+                        "example": "photo.png"
+                      }
+                    }
+                  },
+                  "addCompetence": {
+                    "type": "object",
+                    "description": "Ajouter une compétence au référentiel.",
+                    "properties": {
+                      "nom": {
+                        "type": "string",
+                        "example": "competence SMT"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Description de la nouvelle compétence."
+                      },
+                      "duree_acquisition": {
+                        "type": "string",
+                        "example": "5 jours"
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "Back-end"
+                      },
+                      "modules": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "nom": {
+                              "type": "string",
+                              "example": "Sport"
+                            },
+                            "description": {
+                              "type": "string",
+                              "example": "Sport a la une"
+                            },
+                            "duree_acquisition": {
+                              "type": "integer",
+                              "example": 30
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "deleteCompetence": {
+                    "type": "object",
+                    "description": "Supprimer une compétence du référentiel.",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "-O7QbRhtM8iWvfF8_Xfz"
+                      }
+                    }
+                  },
+                  "deleteModule": {
+                    "type": "object",
+                    "description": "Supprimer un module d'une compétence spécifique.",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 0
+                      },
+                      "competence_id": {
+                        "type": "string",
+                        "example": "-O7QbRhtM8iWvfF8_Xfz"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Référentiel mis à jour avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Référentiel mis à jour avec succès."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Référentiel non trouvé ou erreur lors de la mise à jour",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Échec de la mise à jour des informations générales."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur interne",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la mise à jour du référentiel."
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Suppression soft d'un référentiel spécifique",
+        "description": "Effectue une suppression soft du référentiel en modifiant son statut à 'SUPPRIME'.",
+        "operationId": "softDeleteReferentiel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "L'ID du référentiel à supprimer",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Référentiel supprimé avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Référentiel supprimé avec succès"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Référentiel non trouvé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Référentiel non trouvé ou impossible à supprimer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur lors de la suppression du référentiel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la suppression du référentiel"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/archive/referentiels": {
+      "get": {
+        "summary": "Obtenir la liste des référentiels archivés (soft deleted)",
+        "description": "Récupère tous les référentiels dont le statut est 'SUPPRIME', c'est-à-dire ceux qui ont été supprimés via une suppression soft.",
+        "operationId": "getArchivedReferentiels",
+        "responses": {
+          "200": {
+            "description": "Liste des référentiels archivés récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "firebase123"
+                      },
+                      "code": {
+                        "type": "string",
+                        "example": "REF123"
+                      },
+                      "libelle": {
+                        "type": "string",
+                        "example": "Développement Web"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Référentiel pour le développement web"
+                      },
+                      "photo": {
+                        "type": "string",
+                        "example": "https://example.com/photo.jpg"
+                      },
+                      "statut": {
+                        "type": "string",
+                        "example": "SUPPRIME"
+                      },
+                      "competences": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "nom": {
+                              "type": "string",
+                              "example": "Programmation en PHP"
+                            },
+                            "description": {
+                              "type": "string",
+                              "example": "Capacité à développer en PHP"
+                            },
+                            "duree_acquisition": {
+                              "type": "integer",
+                              "example": 6
+                            },
+                            "type": {
+                              "type": "string",
+                              "example": "pratique"
+                            },
+                            "modules": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "nom": {
+                                    "type": "string",
+                                    "example": "Introduction à PHP"
+                                  },
+                                  "description": {
+                                    "type": "string",
+                                    "example": "Apprendre les bases de PHP"
+                                  },
+                                  "duree_acquisition": {
+                                    "type": "integer",
+                                    "example": 40
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aucun référentiel archivé trouvé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Aucun référentiel archivé trouvé"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur lors de la récupération des référentiels archivés",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la récupération des référentiels archivés"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Détails de l'erreur"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/promotions": {
+      "post": {
+        "summary": "Créer une nouvelle promotion",
+        "description": "Permet aux utilisateurs de créer une nouvelle promotion.",
+        "operationId": "createPromotion",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "libelle": {
+                    "type": "string",
+                    "example": "Promotion 2"
+                  },
+                  "date_debut": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-01-01"
+                  },
+                  "duree": {
+                    "type": "integer",
+                    "example": 6
+                  },
+                  "referentiels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "AWS001"
+                        },
+                        "libelle": {
+                          "type": "string",
+                          "example": "AWS"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "claud"
+                        },
+                        "duree_acquisition": {
+                          "type": "string",
+                          "example": "3 mois"
+                        },
+                        "statut": {
+                          "type": "string",
+                          "example": "ACTIF"
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "libelle",
+                  "date_debut"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Promotion créée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "promotion": {
+                      "type": "object",
+                      "description": "Détails de la promotion créée"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erreur de validation des données"
+          }
+        }
+      },
+      "get": {
+        "summary": "Récupérer toutes les promotions",
+        "description": "Permet de récupérer une liste de toutes les promotions existantes.",
+        "operationId": "getAllPromotions",
+        "responses": {
+          "200": {
+            "description": "Liste des promotions récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "promotionId123"
+                      },
+                      "libelle": {
+                        "type": "string",
+                        "example": "Promotion 6"
+                      },
+                      "date_debut": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-01-01"
+                      },
+                      "date_fin": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-07-01"
+                      },
+                      "duree": {
+                        "type": "integer",
+                        "example": 6
+                      },
+                      "etat": {
+                        "type": "string",
+                        "example": "Actif"
+                      },
+                      "referentiels": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "example": "AWS001"
+                            },
+                            "description": {
+                              "type": "string",
+                              "example": "claud"
+                            },
+                            "duree_acquisition": {
+                              "type": "string",
+                              "example": "3 mois"
+                            },
+                            "etat": {
+                              "type": "string",
+                              "example": "Actif"
+                            },
+                            "libelle": {
+                              "type": "string",
+                              "example": "AWS"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/promotions/{id}": {
+      "patch": {
+        "summary": "Mettre à jour une promotion existante",
+        "description": "Permet de mettre à jour les détails d'une promotion spécifique.",
+        "operationId": "updatePromotion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "L'ID de la promotion à mettre à jour",
+            "schema": {
+              "type": "string",
+              "example": "promotionId123"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date_debut": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-01-01"
+                  },
+                  "date_fin": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-07-01"
+                  },
+                  "duree": {
+                    "type": "integer",
+                    "example": 6
+                  },
+                  "etat": {
+                    "type": "string",
+                    "example": "Actif"
+                  },
+                  "libelle": {
+                    "type": "string",
+                    "example": "Promotion 6"
+                  },
+                  "referentiels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "AWS001"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "claud"
+                        },
+                        "duree_acquisition": {
+                          "type": "string",
+                          "example": "3 mois"
+                        },
+                        "etat": {
+                          "type": "string",
+                          "example": "Actif"
+                        },
+                        "libelle": {
+                          "type": "string",
+                          "example": "AWS"
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "date_debut",
+                  "libelle",
+                  "referentiels"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Promotion mise à jour avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "promotion": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Promotion non trouvée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Promotion not found."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erreur de validation des données"
+          }
+        }
+      }
+    },
+    "/api/v1/promotions/{id}/referentiels": {
+      "patch": {
+        "summary": "Mettre à jour les référentiels d'une promotion",
+        "description": "Permet de mettre à jour les référentiels associés à une promotion existante.",
+        "operationId": "updatePromotionReferentiels",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la promotion à mettre à jour",
+            "schema": {
+              "type": "string",
+              "example": "promotionId123"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date_debut": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-01-01"
+                  },
+                  "date_fin": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-07-01"
+                  },
+                  "duree": {
+                    "type": "integer",
+                    "example": 6
+                  },
+                  "etat": {
+                    "type": "string",
+                    "example": "Actif"
+                  },
+                  "libelle": {
+                    "type": "string",
+                    "example": "Promotion 6"
+                  },
+                  "referentiels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "AWS008"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "claud et DevOps"
+                        },
+                        "duree_acquisition": {
+                          "type": "string",
+                          "example": "5 mois"
+                        },
+                        "etat": {
+                          "type": "string",
+                          "example": "Actif"
+                        },
+                        "libelle": {
+                          "type": "string",
+                          "example": "AWS"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Référentiels mis à jour avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Référentiels mis à jour."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Promotion non trouvée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Promotion not found."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Récupérer les référentiels pour une promotion donnée",
+        "description": "Renvoie la liste des référentiels actifs associés à la promotion spécifiée par son ID.",
+        "operationId": "getPromotionReferentiels",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "L'ID de la promotion pour laquelle récupérer les référentiels.",
+            "schema": {
+              "type": "string",
+              "example": "promo123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Référentiels récupérés avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "example": "AWS001"
+                      },
+                      "libelle": {
+                        "type": "string",
+                        "example": "AWS"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "claud et DevOps"
+                      },
+                      "duree_acquisition": {
+                        "type": "string",
+                        "example": "5 mois"
+                      },
+                      "etat": {
+                        "type": "string",
+                        "example": "ACTIF"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aucune promotion trouvée pour l'ID spécifié",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Promotion not found."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/promotions/{id}/etat": {
+      "patch": {
+        "summary": "Mettre à jour l'état d'une promotion",
+        "description": "Permet de mettre à jour l'état d'une promotion existante.",
+        "operationId": "updatePromotionEtat",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la promotion dont l'état doit être mis à jour",
+            "schema": {
+              "type": "string",
+              "example": "promotionId123"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date_debut": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-01-01"
+                  },
+                  "date_fin": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-07-01"
+                  },
+                  "duree": {
+                    "type": "integer",
+                    "example": 6
+                  },
+                  "etat": {
+                    "type": "string",
+                    "example": "Actif"
+                  },
+                  "libelle": {
+                    "type": "string",
+                    "example": "Promotion 6"
+                  },
+                  "referentiels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "AWS001"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "claud et DevOps"
+                        },
+                        "duree_acquisition": {
+                          "type": "string",
+                          "example": "5 mois"
+                        },
+                        "etat": {
+                          "type": "string",
+                          "example": "Actif"
+                        },
+                        "libelle": {
+                          "type": "string",
+                          "example": "AWS"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "État de la promotion mis à jour avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "État de la promotion mis à jour."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Promotion non trouvée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Promotion not found."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/promotions/encours": {
+      "get": {
+        "summary": "Récupérer la promotion active",
+        "description": "Renvoie la promotion qui est actuellement active.",
+        "operationId": "getActivePromotion",
+        "responses": {
+          "200": {
+            "description": "Promotion active récupérée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "example": "PROMO001"
+                    },
+                    "libelle": {
+                      "type": "string",
+                      "example": "Promotion 6"
+                    },
+                    "date_debut": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2024-01-01"
+                    },
+                    "date_fin": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2024-07-01"
+                    },
+                    "duree": {
+                      "type": "integer",
+                      "example": 6
+                    },
+                    "etat": {
+                      "type": "string",
+                      "example": "Actif"
+                    },
+                    "referentiels": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string",
+                            "example": "AWS001"
+                          },
+                          "libelle": {
+                            "type": "string",
+                            "example": "AWS"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "claud et DevOps"
+                          },
+                          "duree_acquisition": {
+                            "type": "string",
+                            "example": "5 mois"
+                          },
+                          "etat": {
+                            "type": "string",
+                            "example": "Actif"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aucune promotion active trouvée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "No active promotion found."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/promotions/{id}/cloturer": {
+      "patch": {
+        "summary": "Clôturer une promotion",
+        "description": "Clôture une promotion en mettant à jour son état à 'Clôturé' lorsque la date de fin est atteinte. Déclenche également l'envoi des relevés de notes.",
+        "operationId": "closePromotion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "L'ID de la promotion à clôturer",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Promotion clôturée avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "promo123"
+                    },
+                    "etat": {
+                      "type": "string",
+                      "example": "Clôturé"
+                    },
+                    "date_fin": {
+                      "type": "string",
+                      "example": "2024-12-31"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Promotion closed successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Impossible de clôturer la promotion avant la date de fin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "La promotion ne peut être clôturée que si la date de fin est atteinte."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Promotion non trouvée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Promotion not found."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur interne",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Erreur lors de la clôture de la promotion."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
