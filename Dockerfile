@@ -1,55 +1,42 @@
-# Étape de construction
-FROM php:8.1-fpm as builder
+# Utiliser une image PHP officielle avec FPM
+FROM php:8.1-fpm
 
 # Installer les dépendances nécessaires
 RUN apt-get update && apt-get install -y \
+    build-essential \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
     unzip \
     git \
+    curl \
+    libonig-dev \
+    pkg-config \
     libssl-dev \
-    libpq-dev \ 
-    && rm -rf /var/lib/apt/lists/*
-
-# Installer gRPC
-RUN pecl install grpc \
-    && docker-php-ext-enable grpc
+    libpq-dev  # Ajout de la bibliothèque PostgreSQL
 
 # Installer les extensions PHP requises pour Laravel
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo_pgsql zip
+    && docker-php-ext-install gd \
+    && docker-php-ext-install pdo pdo_mysql zip \
+    && docker-php-ext-install pdo_pgsql  # Installation du driver pdo_pgsql
+
+# Installer l'extension MongoDB
+RUN pecl install mongodb \
+    && docker-php-ext-enable mongodb
 
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copier les fichiers de dépendances
-WORKDIR /app
-COPY composer.json composer.lock ./
-
-# Installer les dépendances
-RUN composer install --no-dev --no-scripts --no-autoloader
-
-# Étape finale
-FROM php:8.1-fpm
-
-# Copier les extensions et configurations PHP depuis l'étape de construction
-COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
-COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
-
-# Copier Composer dans l'image finale depuis l'étape builder
-COPY --from=builder /usr/bin/composer /usr/bin/composer
-
-# Copier l'application
+# Copier le projet Laravel dans le conteneur
 WORKDIR /var/www
 COPY . .
-COPY --from=builder /app/vendor/ ./vendor/
 
-# Finaliser l'installation de Composer
-RUN composer dump-autoload --optimize
+# Installer les dépendances PHP
+RUN composer install --optimize-autoloader --no-dev
 
-# Définir les permissions
+# Changer les permissions pour les fichiers Laravel (storage et cache)
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/storage \
     && chmod -R 755 /var/www/bootstrap/cache

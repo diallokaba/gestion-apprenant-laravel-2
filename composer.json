@@ -10,7 +10,6 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
-        "google/cloud-firestore": "^1.46",
         "kreait/laravel-firebase": "^5.9"
     },
     "require-dev": {
