@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "API de Gestion des Utilisateurs",
+    "title": "Une application Backend de gestion des apprenants",
     "version": "1.0.0",
     "description": "API pour la gestion des utilisateurs, y compris l'authentification et la manipulation des données utilisateur."
   },
@@ -20,11 +20,11 @@
     }
   ],
   "paths": {
-    "/api/v1/login": {
+    "/api/v1/auth/login": {
       "post": {
         "summary": "Connexion d'un utilisateur",
         "description": "Permet aux utilisateurs de se connecter en utilisant leurs identifiants.",
-        "operationId": "loginUser",
+        "operationId": "UserLogin",
         "requestBody": {
           "required": true,
           "content": {
@@ -33,12 +33,12 @@
                 "type": "object",
                 "properties": {
                   "email": {
-                    "type": "string",
-                    "example": "admin@gmail.com"
+                    "type": "password",
+                    "example": "groupe6p6@gmail.com"
                   },
                   "password": {
                     "type": "string",
-                    "example": "password123"
+                    "example": "Passer@123"
                   }
                 },
                 "required": [
