@@ -1,40 +1,46 @@
-# Utiliser une image PHP officielle avec FPM
-FROM php:8.1-fpm
+# Étape de construction
+FROM grpc/php:8.1 as builder
 
 # Installer les dépendances nécessaires
 RUN apt-get update && apt-get install -y \
-    build-essential \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
     unzip \
     git \
-    curl \
-    libonig-dev \
-    pkg-config \
-    libssl-dev \
-    libpq-dev \
-    libgrpc-dev \  
-    && pecl install grpc \
-    && docker-php-ext-enable grpc
+    && rm -rf /var/lib/apt/lists/*
 
 # Installer les extensions PHP requises pour Laravel
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd \
-    && docker-php-ext-install pdo_pgsql  # Installation du driver pdo_pgsql
+    && docker-php-ext-install gd pdo_pgsql zip
 
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copier le projet Laravel dans le conteneur
+# Copier les fichiers de dépendances
+WORKDIR /app
+COPY composer.json composer.lock ./
+
+# Installer les dépendances
+RUN composer install --no-dev --no-scripts --no-autoloader
+
+# Étape finale
+FROM grpc/php:8.1
+
+# Copier les extensions et configurations PHP depuis l'étape de construction
+COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+
+# Copier l'application
 WORKDIR /var/www
 COPY . .
+COPY --from=builder /app/vendor/ ./vendor/
 
-# Installer les dépendances PHP, en ignorant les exigences de l'extension gRPC
-RUN composer install --optimize-autoloader --no-dev --ignore-platform-req=ext-grpc
+# Finaliser l'installation de Composer
+RUN composer dump-autoload --optimize
 
-# Changer les permissions pour les fichiers Laravel (storage et cache)
+# Définir les permissions
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/storage \
     && chmod -R 755 /var/www/bootstrap/cache
