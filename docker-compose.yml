@@ -1,16 +1,42 @@
-version: '3'
+version: '3.8'
 
 services:
-  nginx:
-    image: nginx:1.22-alpine
-    ports:
-      - "8009:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./:/code
-  php:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: app
     volumes:
-      - ./:/code
+      - .:/var/www
+      - ./storage/app/gest-apprenant-laravel-firebase-adminsdk-iw06h-7cf3b600e8.json:/var/www/storage/app/gest-apprenant-laravel-firebase-adminsdk-iw06h-7cf3b600e8.json
+    ports:
+      - "8000:8000"  # Le serveur Artisan écoutera sur ce port
+    networks:
+      - laravel
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres  # Nom du service PostgreSQL
+      DB_PORT: 5432
+      DB_DATABASE: gest_apprenant_laravel
+      DB_USERNAME: postgres
+      DB_PASSWORD: 'Godisgreat313#'
+
+  postgres:  # Service PostgreSQL
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: gest_apprenant_laravel
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 'Godisgreat313#'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
+
+volumes:
+  postgres_data:  # Volume persistant pour les données PostgreSQL
