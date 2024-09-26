@@ -1,5 +1,5 @@
 # Étape de construction
-FROM grpc/php:8.1 as builder
+FROM php:8.1-fpm as builder
 
 # Installer les dépendances nécessaires
 RUN apt-get update && apt-get install -y \
@@ -9,7 +9,12 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     unzip \
     git \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Installer gRPC
+RUN pecl install grpc \
+    && docker-php-ext-enable grpc
 
 # Installer les extensions PHP requises pour Laravel
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -26,7 +31,7 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader
 
 # Étape finale
-FROM grpc/php:8.1
+FROM php:8.1-fpm
 
 # Copier les extensions et configurations PHP depuis l'étape de construction
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
