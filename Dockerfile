@@ -38,6 +38,9 @@ FROM php:8.1-fpm
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 
+# Copier Composer dans l'image finale depuis l'étape builder
+COPY --from=builder /usr/bin/composer /usr/bin/composer
+
 # Copier l'application
 WORKDIR /var/www
 COPY . .
