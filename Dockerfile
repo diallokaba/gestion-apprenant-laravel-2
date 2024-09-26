@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     libssl-dev \
+    libpq-dev \ 
     && rm -rf /var/lib/apt/lists/*
 
 # Installer gRPC
